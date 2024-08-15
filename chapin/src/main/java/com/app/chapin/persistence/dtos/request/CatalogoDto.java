@@ -1,4 +1,4 @@
-package com.app.chapin.persistence.dtos;
+package com.app.chapin.persistence.dtos.request;
 
 import lombok.Data;
 

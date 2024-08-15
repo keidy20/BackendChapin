@@ -30,7 +30,8 @@ public class SecurityConfig  {
                                 .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/password-reset/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                                .anyRequest().authenticated()
+                                //.anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManager ->
                         sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

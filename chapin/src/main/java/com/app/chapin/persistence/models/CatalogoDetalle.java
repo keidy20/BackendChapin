@@ -1,8 +1,6 @@
 package com.app.chapin.persistence.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,6 +11,8 @@ import java.time.LocalDateTime;
 public class CatalogoDetalle {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_catalogo_detalle")
+    @SequenceGenerator(name = "seq_catalogo_detalle", sequenceName = "chapin_schema.secuencia_catalogo_detalle", allocationSize = 1)
     private Integer id;
     private Integer idCatalogo;
     private String nombre;

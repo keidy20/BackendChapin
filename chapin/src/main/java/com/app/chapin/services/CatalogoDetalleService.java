@@ -1,7 +1,6 @@
 package com.app.chapin.services;
 
-import com.app.chapin.persistence.dtos.CatalogoDto;
-import com.app.chapin.persistence.models.Catalogo;
+import com.app.chapin.persistence.dtos.request.CatalogoDto;
 import com.app.chapin.persistence.models.CatalogoDetalle;
 import com.app.chapin.persistence.respository.CatalogoDetalleRepository;
 import lombok.extern.slf4j.Slf4j;
