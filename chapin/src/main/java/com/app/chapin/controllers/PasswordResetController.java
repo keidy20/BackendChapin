@@ -1,5 +1,6 @@
 package com.app.chapin.controllers;
 
+import com.app.chapin.persistence.dtos.request.PasswordResetDto;
 import com.app.chapin.persistence.models.PasswordResetToken;
 import com.app.chapin.persistence.models.Usuario;
 import com.app.chapin.persistence.respository.PasswordResetTokenRepository;
@@ -8,10 +9,7 @@ import com.app.chapin.services.EmailService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.Optional;
@@ -32,10 +30,10 @@ public class PasswordResetController {
     public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
         Optional<Usuario> usuario = usuariosRepository.findByEmail(email);
         if (!usuario.isPresent()) {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
 
-        // Generate token
+        // Generar token
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
@@ -44,26 +42,26 @@ public class PasswordResetController {
 
         tokenRepository.save(resetToken);
 
-        // Send email
-        // emailService.sendPasswordResetEmail(email, token);
+        // Envio de email
+        emailService.sendPasswordResetEmail(email, token);
 
-        return ResponseEntity.ok("Password reset link has been sent to your email " + token);
+        return ResponseEntity.ok("El siguiente token se ha enviado a tu correo " + token);
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        Optional<PasswordResetToken> resetToken = tokenRepository.findByToken(token);
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetDto dto) {
+        Optional<PasswordResetToken> resetToken = tokenRepository.findByToken(dto.getToken());
         if (!resetToken.isPresent() || resetToken.get().getExpiracion().before(new Date())) {
-            return ResponseEntity.badRequest().body("Invalid or expired token");
+            return ResponseEntity.badRequest().body("Invalido o el token expiro");
         }
 
         Usuario user = resetToken.get().getUsuario();
-        user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+        user.setPassword(new BCryptPasswordEncoder().encode(dto.getNewPassword()));
         usuariosRepository.save(user);
 
-        // Optionally, delete the token after use
+        // Opcional eliminar el token
         tokenRepository.delete(resetToken.get());
 
-        return ResponseEntity.ok("Password has been reset successfully");
+        return ResponseEntity.ok("La contraseña se cambio correctamente");
     }
 }

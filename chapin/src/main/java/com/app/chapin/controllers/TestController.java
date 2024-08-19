@@ -1,5 +1,6 @@
 package com.app.chapin.controllers;
 
+import com.app.chapin.services.EmailService;
 import com.app.chapin.services.TestService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class TestController {
     @Autowired
     private TestService testService;
 
+    @Autowired
+    private EmailService emailService;
+
     @GetMapping("/gestorProceso/obtenerArchivo/{idArchivo}")
     public ResponseEntity<?> getArchiviAps(@PathVariable @Parameter(description  = "id archivo") String idArchivo) {
         try {
@@ -25,4 +29,14 @@ public class TestController {
             return ResponseEntity.status(500).body(null);
         }
     }
+
+    @GetMapping("/envio-correo")
+    public void enviarCorreo() {
+        try {
+            emailService.sendEmail();
+        } catch (Exception e) {
+            System.out.println("Ocurrio un error " + e.getMessage());
+        }
+    }
+
 }
