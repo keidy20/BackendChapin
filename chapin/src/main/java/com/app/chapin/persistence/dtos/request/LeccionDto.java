@@ -6,7 +6,7 @@ import lombok.Data;
 public class LeccionDto {
     private String  tipoLeccion;
     private String titulo;
-    private String contenido;
+    private ContenidoDTO contenido;
     private String nivel;
     private Integer orden;
     private Integer duracionEstimada;

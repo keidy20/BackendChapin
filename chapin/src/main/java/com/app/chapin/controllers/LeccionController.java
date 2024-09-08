@@ -27,8 +27,8 @@ public class LeccionController {
         return service.getLecciones(id);
     }
     @GetMapping("/all")
-    public List<Lecciones> getLecciones() {
-        return service.getLecciones();
+    public List<LeccionDto> getLecciones() {
+        return service.getLeccionesDtos();
     }
 
     @PutMapping("/{id}")
