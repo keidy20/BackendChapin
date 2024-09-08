@@ -61,6 +61,7 @@ public class CatalogoService {
         detalle.setIdCatalogo(dto.getIdCatalogo());
         detalle.setNombre(dto.getNombre());
         detalle.setDetalle(dto.getDetalle());
+        detalle.setValor(dto.getValor());
         detalle.setActivo(dto.isActivo());
         detalle.setFechaAdicion(LocalDateTime.now());
 

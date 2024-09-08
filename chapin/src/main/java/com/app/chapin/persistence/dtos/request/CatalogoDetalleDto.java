@@ -8,5 +8,6 @@ public class CatalogoDetalleDto {
     private Integer idCatalogo;
     private String nombre;
     private String detalle;
+    private String valor;
     private boolean activo;
 }

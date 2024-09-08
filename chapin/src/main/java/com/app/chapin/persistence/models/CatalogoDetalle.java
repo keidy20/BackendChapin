@@ -17,6 +17,7 @@ public class CatalogoDetalle {
     private Integer idCatalogo;
     private String nombre;
     private String detalle;
+    private String valor;
     private Boolean activo;
     private LocalDateTime fechaAdicion;
     private LocalDateTime fechaModifico;
