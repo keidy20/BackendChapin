@@ -1,8 +1,8 @@
 package com.app.chapin.controllers;
 
-import com.app.chapin.persistence.dtos.request.ParamsApiGoogleDto;
+import com.app.chapin.persistence.dtos.request.ParamsApiSpeechToTextGoogleDto;
 import com.app.chapin.services.SpeechToTextService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,16 +38,16 @@ public class SpeechToTextController {
     }
 
     @PostMapping("/transcribir-base-64")
-    public String transcribir(@RequestBody ParamsApiGoogleDto dto) {
+    public ResponseEntity<?> transcribir(@RequestBody ParamsApiSpeechToTextGoogleDto dto) {
         try {
 
             // Transcribir el audio usando la API de Google Speech-to-Text
-            String transcription = service.transcribeAudio(dto.getTexto());
-            return transcription;
+            String transcription = service.transcribeAudio(dto.getBase64());
+            return ResponseEntity.ok(service.compararTextos(dto.getTexto(), transcription));
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error: " + e.getMessage();
+            return ResponseEntity.status(500).body("Ocurrio un error al comparar los textos");
         }
     }
 }

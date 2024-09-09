@@ -90,7 +90,7 @@ public class LeccionService {
 
         // Deserializar el JSON de 'contenido' a un ContenidoDTO
         //ContenidoDTO contenidoDto = objectMapper.readValue(leccion.getContenido(), ContenidoDTO.class);
-        ContenidoDTO contenidoDto = gson.fromJson(leccion.getContenido(), ContenidoDTO.class);
+        Object contenidoDto = gson.fromJson(leccion.getContenido(), Object.class);
         dto.setContenido(contenidoDto);
 
         return dto;

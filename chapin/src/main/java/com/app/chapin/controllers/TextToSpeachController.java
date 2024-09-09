@@ -1,6 +1,6 @@
 package com.app.chapin.controllers;
 
-import com.app.chapin.persistence.dtos.request.ParamsApiGoogleDto;
+import com.app.chapin.persistence.dtos.request.ParamsApiTextToSpeechGoogleDto;
 import com.app.chapin.services.TextToSpeechService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -18,7 +18,7 @@ public class TextToSpeachController {
     private TextToSpeechService service;
 
     @PostMapping
-    public ResponseEntity<ByteArrayResource> sintetizarAudio(@RequestBody ParamsApiGoogleDto dto) {
+    public ResponseEntity<ByteArrayResource> sintetizarAudio(@RequestBody ParamsApiTextToSpeechGoogleDto dto) {
         try {
             byte[] audioBytes = service.sintetizarAudio(dto.getTexto());
 
