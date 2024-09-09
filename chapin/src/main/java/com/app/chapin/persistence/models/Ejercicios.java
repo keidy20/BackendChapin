@@ -13,7 +13,6 @@ public class Ejercicios {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_ejercicios")
     @SequenceGenerator(name = "seq_ejercicios", sequenceName = "chapin_schema.secuencia_ejercicios", allocationSize = 1)
     private Integer idEjercicio;
-    private Integer idLeccion;
     private String tipoEjercicio;
     private String titulo;
     private String contenido;

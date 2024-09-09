@@ -6,7 +6,7 @@ import lombok.Data;
 public class EjercicioDto {
     private String  tipoEjercicio;
     private String titulo;
-    private ContenidoEjercicioDto contenido;
+    private Object contenido;
     private Integer orden;
     private Integer duracionEstimada;
     private boolean activo;

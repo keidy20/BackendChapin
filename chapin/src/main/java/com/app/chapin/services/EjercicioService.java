@@ -88,7 +88,7 @@ public class EjercicioService {
         dto.setOrden(ejercicio.getOrden());
 
         // Deserializar el JSON de 'contenido' a un ContenidoEjercicioDto
-        ContenidoEjercicioDto contenidoDto = gson.fromJson(ejercicio.getContenido(), ContenidoEjercicioDto.class);
+        Object contenidoDto = gson.fromJson(ejercicio.getContenido(), Object.class);
         dto.setContenido(contenidoDto);
 
         return dto;

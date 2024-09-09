@@ -22,6 +22,7 @@ public class LeccionController {
     public Lecciones crearLeccion(@RequestBody LeccionDto dto){
         return service.crearLeccion(dto);
     }
+
     @GetMapping("/{id}")
     public Lecciones getLecciones(@PathVariable @Parameter(description  = "id lecciones") Integer id) {
         return service.getLecciones(id);
