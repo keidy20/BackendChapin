@@ -98,6 +98,7 @@ public class SpeechToTextService {
 
         String texto1Normalize = normalizeAndRemovePunctuation(texto);
         String texto2Normalize = normalizeAndRemovePunctuation(transcription);
+        int cantidadPalabras = texto2Normalize.split(" ").length;
 
         log.info("Texto 1 {}", texto1Normalize);
         log.info("Texto 2 {}", texto2Normalize);
@@ -105,14 +106,14 @@ public class SpeechToTextService {
         // Calcula el porcentaje de similitud
         double similitud = calcularPorcentajeSimilitud(texto1Normalize, texto2Normalize);
 
-        System.out.println("Porcentaje de similitud: " + similitud + "%");
+        log.info("Porcentaje de similitud: {}%", similitud);
 
         boolean textosIguales = false;
-        if (similitud > 90) {
+        if (similitud > 80) {
             textosIguales = true;
         }
 
-        return new SpeechToTextResponse(similitud, textosIguales);
+        return new SpeechToTextResponse(similitud, textosIguales, cantidadPalabras);
     }
 
     private static String normalizeAndRemovePunctuation(String text) {

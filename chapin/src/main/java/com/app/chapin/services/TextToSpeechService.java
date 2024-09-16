@@ -61,7 +61,7 @@ public class TextToSpeechService {
         JsonObject jsonObject = gson.fromJson(response.getBody(), JsonObject.class);
 
         String audioContent = String.valueOf(jsonObject.get("audioContent"));
-        System.out.println("Audio content " + audioContent);
+        //System.out.println("Audio content " + audioContent);
 
         audioContent = audioContent.replaceAll("\"", "");
         byte[] audioBytes = Base64.getDecoder().decode(audioContent);

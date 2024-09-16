@@ -7,6 +7,7 @@ import com.app.chapin.persistence.models.Lecciones;
 import com.app.chapin.services.LeccionService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class LeccionController {
     }
 
     @GetMapping("/{id}")
-    public Lecciones getLecciones(@PathVariable @Parameter(description  = "id lecciones") Integer id) {
+    public LeccionDto getLecciones(@PathVariable @Parameter(description  = "id lecciones") Integer id) {
         return service.getLecciones(id);
     }
     @GetMapping("/all")
@@ -38,5 +39,14 @@ public class LeccionController {
             @RequestBody LeccionDto dto
     ) {
         return service.actualizarLecciones(dto, id);
+    }
+
+    @PostMapping("/audio/{id}/{forzar}")
+    public ResponseEntity<?> agregarAudioLeccion (
+            @PathVariable @Parameter(description = "id leccion") Integer id,
+            @PathVariable @Parameter(description = "forzar subida") Boolean forzar
+    ) {
+        service.agregarAudio(id, forzar);
+        return ResponseEntity.ok("Se agregaron los archivos de audio");
     }
 }
