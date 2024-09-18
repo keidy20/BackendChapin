@@ -1,23 +1,34 @@
 package com.app.chapin.services;
 
+import com.app.chapin.exceptions.NotFoundException;
+import com.app.chapin.persistence.dtos.AudioDto;
+import com.app.chapin.persistence.dtos.ByteArrayMultipartFile;
 import com.app.chapin.persistence.dtos.request.LeccionDto;
-import com.app.chapin.persistence.dtos.request.ContenidoDTO;
 import com.app.chapin.persistence.models.Lecciones;
 import com.app.chapin.persistence.respository.LeccionRepository;
+import com.app.chapin.utils.Constantes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class LeccionService {
+
+    private final String CONTENT_TYPE_AUDIO = "audio/mpeg";
 
     @Autowired
     private LeccionRepository repository;
@@ -25,6 +36,12 @@ public class LeccionService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Gson gson = new Gson();
+
+    @Autowired
+    private TextToSpeechService textToSpeechService;
+
+    @Autowired
+    private StorageService storageService;
 
     public Lecciones crearLeccion(LeccionDto dto) {
         Lecciones leccion = new Lecciones();
@@ -81,6 +98,7 @@ public class LeccionService {
 
     private LeccionDto convertirLeccionAReponseDto(Lecciones leccion) {
         LeccionDto dto = new LeccionDto();
+        dto.setId(leccion.getIdLeccion());
         dto.setTipoLeccion(leccion.getTipoLeccion());
         dto.setTitulo(leccion.getTitulo());
         dto.setNivel(leccion.getNivel());
@@ -96,7 +114,101 @@ public class LeccionService {
         return dto;
     }
 
-    public Lecciones getLecciones(Integer id) {
-        return null;
+    public LeccionDto getLecciones(Integer id) {
+        return repository.findById(id)
+                .stream()
+                .map(this::convertirLeccionAReponseDto)
+                .collect(Collectors.toList()).get(0);
+    }
+
+    public void agregarAudio(Integer id, Boolean forzar) {
+        Lecciones leccion = repository.findById(id).orElseThrow(() -> new NotFoundException("No existe la leccion"));
+
+        if (leccion.getTipoLeccion().equals(Constantes.LECCION_QUIZ)) {
+            subirAudioQuiz(leccion, forzar);
+        }
+
+        if (leccion.getTipoLeccion().equals(Constantes.LECCION_LECTURA)) {
+            subirAudioLectura(leccion, forzar);
+        }
+
+    }
+
+    private void subirAudioLectura(Lecciones leccion, Boolean forzar) {
+        JsonElement jsonElement = JsonParser.parseString(leccion.getContenido());
+
+        String path = "lecciones/" + leccion.getTipoLeccion() + "_" + leccion.getIdLeccion() + "/audios/";
+
+        List<AudioDto> audios = new ArrayList<>();
+
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            if (jsonObject.has("audios") && !forzar) {
+                log.info("Ya existen audios cargados en lecciones");
+                return;
+            }
+            JsonArray lecciones = jsonObject.getAsJsonArray("lecciones");
+
+            lecciones.forEach((element) -> {
+                JsonObject object = element.getAsJsonObject();
+                String id = object.get("id").getAsString();
+                String leccionAudio = object.get("audio").getAsString();
+                String fileName = "LECCION_".concat(id);
+                log.info("Id: {}, leccionAudio: {}", id, leccionAudio);
+                byte[] audioBytes = textToSpeechService.sintetizarAudio(leccionAudio);
+
+                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, CONTENT_TYPE_AUDIO);
+                String url = storageService.upload(multipartFile, path.concat(fileName));
+                audios.add(new AudioDto(id, url));
+            });
+
+            log.info("Audios lecciones {}", audios);
+            Type listType = new TypeToken<List<AudioDto>>() {}.getType();
+            JsonElement audiosElement = gson.toJsonTree(audios, listType);
+            jsonObject.add("audios", audiosElement);
+
+            leccion.setContenido(gson.toJson(jsonObject));
+            repository.save(leccion);
+        }
+    }
+
+    private void subirAudioQuiz(Lecciones leccion, Boolean forzar) {
+        JsonElement jsonElement = JsonParser.parseString(leccion.getContenido());
+
+        String path = "lecciones/" + leccion.getTipoLeccion() + "_" + leccion.getIdLeccion() + "/audios/";
+
+        List<AudioDto> audios = new ArrayList<>();
+
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            if (jsonObject.has("audios") && !forzar) {
+                log.info("Ya existen audios cargados en quizes");
+                return;
+            }
+            JsonArray quiz = jsonObject.getAsJsonArray("quizData");
+
+            quiz.forEach((element) -> {
+                JsonObject object = element.getAsJsonObject();
+                String id = object.get("id").getAsString();
+                String audioPregunta = object.get("audioPregunta").getAsString();
+                String fileName = "QUIZ_".concat(id);
+                log.info("Id: {}, audioPregunta: {}", id, audioPregunta);
+                byte[] audioBytes = textToSpeechService.sintetizarAudio(audioPregunta);
+
+                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, CONTENT_TYPE_AUDIO);
+                String url = storageService.upload(multipartFile, path.concat(fileName));
+                audios.add(new AudioDto(id, url));
+            });
+
+            log.info("Audios quizzes {}", audios);
+            Type listType = new TypeToken<List<AudioDto>>() {}.getType();
+            JsonElement audiosElement = gson.toJsonTree(audios, listType);
+            jsonObject.add("audios", audiosElement);
+
+            leccion.setContenido(gson.toJson(jsonObject));
+            repository.save(leccion);
+        }
     }
 }

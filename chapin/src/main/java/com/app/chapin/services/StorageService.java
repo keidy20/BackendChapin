@@ -3,6 +3,7 @@ package com.app.chapin.services;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,20 +18,24 @@ import java.nio.file.Files;
 @Service
 public class StorageService {
 
-    private final String BUCKET_NAME = "indigo-cider-432618-r6.appspot.com";
-    private String uploadOrUpdateFile(File file, String fileName) throws IOException {
-        BlobId blobId = BlobId.of("indigo-cider-432618-r6.appspot.com", fileName); // Replace with your bucker name
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("application/pdf").build();
-        InputStream inputStream = StorageService.class.getClassLoader().getResourceAsStream("firebase-private-key.json"); // change the file name with your one
+    @Value("${BUCKET_NAME}")
+    private String BUCKET_NAME;
+
+    @Value("${FIREBASE_KEY}")
+    private String FIREBASE_KEY;
+
+    private String uploadOrUpdateFile(File file, String fileName, String contentType) throws IOException {
+        BlobId blobId = BlobId.of(BUCKET_NAME, fileName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(contentType).build();
+        InputStream inputStream = StorageService.class.getClassLoader().getResourceAsStream(FIREBASE_KEY);
         Credentials credentials = GoogleCredentials.fromStream(inputStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
-//storage.get("indigo-cider-432618-r6.appspot.com","test/constanciartu.pdf")
         return generateDownloadUrl(fileName);
     }
 
     public void eliminarCarpetas() throws IOException {
-        InputStream inputStream = StorageService.class.getClassLoader().getResourceAsStream("firebase-private-key.json"); // change the file name with your one
+        InputStream inputStream = StorageService.class.getClassLoader().getResourceAsStream(FIREBASE_KEY); // change the file name with your one
         Credentials credentials = GoogleCredentials.fromStream(inputStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
@@ -68,7 +73,6 @@ public class StorageService {
         File tempFile = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             fos.write(multipartFile.getBytes());
-            fos.close();
         }
         return tempFile;
     }
@@ -78,13 +82,13 @@ public class StorageService {
     }
 
 
-    public String upload(MultipartFile multipartFile) {
+    public String upload(MultipartFile multipartFile, String path) {
         try {
-            String fileName = multipartFile.getOriginalFilename();                        // to get original file name
+            String fileName = multipartFile.getOriginalFilename();
             //fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));  // to generated random string values for file name.
 
-            File file = this.convertToFile(multipartFile, fileName);                      // to convert multipartFile to File
-            String URL = this.uploadOrUpdateFile(file, "test1/"+fileName);                                   // to get uploaded file link
+            File file = this.convertToFile(multipartFile, fileName);
+            String URL = this.uploadOrUpdateFile(file, path.concat(fileName), multipartFile.getContentType());
             file.delete();
             return URL;
         } catch (Exception e) {

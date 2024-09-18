@@ -17,9 +17,11 @@ public class StorageController {
 
     private final StorageService service;
 
-    @PostMapping
-    public String upload(@RequestParam("file") MultipartFile multipartFile) {
-        return service.upload(multipartFile);
+    @PostMapping(consumes = "multipart/form-data")
+    public String upload(
+            @RequestParam("file") MultipartFile multipartFile,
+            @RequestParam("path") String path) {
+        return service.upload(multipartFile, path.concat("/"));
     }
 
     @PostMapping("/eliminar")

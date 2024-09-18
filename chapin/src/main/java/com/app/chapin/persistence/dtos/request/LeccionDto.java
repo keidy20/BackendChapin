@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class LeccionDto {
+    private Integer id;
     private String  tipoLeccion;
     private String titulo;
     private Object contenido;

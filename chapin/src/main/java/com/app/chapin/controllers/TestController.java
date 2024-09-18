@@ -21,22 +21,10 @@ public class TestController {
     @Autowired
     private EmailService emailService;
 
-    @GetMapping("/gestorProceso/obtenerArchivo/{idArchivo}")
-    public ResponseEntity<?> getArchiviAps(@PathVariable @Parameter(description  = "id archivo") String idArchivo) {
-        try {
-            return testService.obtenerArchivo(idArchivo);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
-        }
-    }
 
-    @GetMapping("/envio-correo")
-    public void enviarCorreo() {
-        try {
-            emailService.sendEmail();
-        } catch (Exception e) {
-            System.out.println("Ocurrio un error " + e.getMessage());
-        }
+    @GetMapping("/test")
+    public String test() {
+        return "Test";
     }
 
 }

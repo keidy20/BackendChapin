@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class SpeechToTextResponse {
     private double similitud;
     private boolean igual;
+    private int cantidadPalabras;
 }
