@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EjercicioDto {
+    private Integer id;
     private String  tipoEjercicio;
     private String titulo;
     private Object contenido;

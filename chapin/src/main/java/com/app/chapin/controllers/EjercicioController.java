@@ -4,6 +4,7 @@ import com.app.chapin.persistence.dtos.request.EjercicioDto;
 import com.app.chapin.services.EjercicioService;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,5 +37,14 @@ public class EjercicioController {
             @RequestBody EjercicioDto dto
     ) {
         return service.actualizarEjercicio(dto, id);
+    }
+
+    @PostMapping("/audio/{id}/{forzar}")
+    public ResponseEntity<?> agregarAudioLeccion (
+            @PathVariable @Parameter(description = "id ejercicio") Integer id,
+            @PathVariable @Parameter(description = "forzar subida") Boolean forzar
+    ) {
+        service.agregarAudio(id, forzar);
+        return ResponseEntity.ok("Se agregaron los archivos de audio");
     }
 }
