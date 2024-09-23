@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 @Service
 public class LeccionService {
 
-    private final String CONTENT_TYPE_AUDIO = "audio/mpeg";
-
     @Autowired
     private LeccionRepository repository;
 
@@ -158,7 +156,7 @@ public class LeccionService {
                 log.info("Id: {}, leccionAudio: {}", id, leccionAudio);
                 byte[] audioBytes = textToSpeechService.sintetizarAudio(leccionAudio);
 
-                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, CONTENT_TYPE_AUDIO);
+                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, Constantes.CONTENT_TYPE_AUDIO);
                 String url = storageService.upload(multipartFile, path.concat(fileName));
                 audios.add(new AudioDto(id, url));
             });
@@ -197,7 +195,7 @@ public class LeccionService {
                 log.info("Id: {}, audioPregunta: {}", id, audioPregunta);
                 byte[] audioBytes = textToSpeechService.sintetizarAudio(audioPregunta);
 
-                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, CONTENT_TYPE_AUDIO);
+                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, Constantes.CONTENT_TYPE_AUDIO);
                 String url = storageService.upload(multipartFile, path.concat(fileName));
                 audios.add(new AudioDto(id, url));
             });

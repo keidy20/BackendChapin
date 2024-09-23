@@ -1,17 +1,25 @@
 package com.app.chapin.services;
 
+import com.app.chapin.exceptions.NotFoundException;
+import com.app.chapin.persistence.dtos.AudioDto;
+import com.app.chapin.persistence.dtos.ByteArrayMultipartFile;
 import com.app.chapin.persistence.dtos.request.EjercicioDto;
 import com.app.chapin.persistence.dtos.request.ContenidoEjercicioDto;
 import com.app.chapin.persistence.models.Ejercicios;
 import com.app.chapin.persistence.respository.EjercicioRepository;
+import com.app.chapin.utils.Constantes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +32,12 @@ public class EjercicioService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Gson gson = new Gson();
+
+    @Autowired
+    private TextToSpeechService textToSpeechService;
+
+    @Autowired
+    private StorageService storageService;
 
     public EjercicioDto crearEjercicio(EjercicioDto dto) {
         Ejercicios ejercicio = new Ejercicios();
@@ -81,6 +95,7 @@ public class EjercicioService {
 
     private EjercicioDto convertirEjercicioAResponseDto(Ejercicios ejercicio) {
         EjercicioDto dto = new EjercicioDto();
+        dto.setId(ejercicio.getIdEjercicio());
         dto.setTipoEjercicio(ejercicio.getTipoEjercicio());
         dto.setTitulo(ejercicio.getTitulo());
         dto.setDuracionEstimada(ejercicio.getDuracionEstimada());
@@ -96,5 +111,52 @@ public class EjercicioService {
 
     public Ejercicios getEjercicios(Integer id) {
         return repository.findById(id).orElse(null);
+    }
+
+    public void agregarAudio(Integer id, Boolean forzar) {
+        
+        Ejercicios ejercicio = repository.findById(id).orElseThrow(() -> new NotFoundException("No se encontro el ejercicio"));
+
+        subirAudioEjercicio(ejercicio, forzar);
+    }
+
+    private void subirAudioEjercicio(Ejercicios ejercicio, Boolean forzar) {
+
+        JsonElement jsonElement = JsonParser.parseString(ejercicio.getContenido());
+
+        String path = "ejercicios/" + ejercicio.getTipoEjercicio()+ "_" + ejercicio.getIdEjercicio() + "/audios/";
+
+        List<AudioDto> audios = new ArrayList<>();
+
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            if (jsonObject.has("audios") && !forzar) {
+                log.info("Ya existen audios cargados en lecciones");
+                return;
+            }
+            JsonArray lecciones = jsonObject.getAsJsonArray("Ejercicios");
+
+            lecciones.forEach((element) -> {
+                JsonObject object = element.getAsJsonObject();
+                String id = object.get("id").getAsString();
+                String leccionAudio = object.get("audio").getAsString();
+                String fileName = "EJERCICIO_".concat(id);
+                log.info("Id: {}, ejercicioAudio: {}", id, leccionAudio);
+                byte[] audioBytes = textToSpeechService.sintetizarAudio(leccionAudio);
+
+                MultipartFile multipartFile = new ByteArrayMultipartFile(audioBytes,fileName, Constantes.CONTENT_TYPE_AUDIO);
+                String url = storageService.upload(multipartFile, path.concat(fileName));
+                audios.add(new AudioDto(id, url));
+            });
+
+            log.info("Audios lecciones {}", audios);
+            Type listType = new TypeToken<List<AudioDto>>() {}.getType();
+            JsonElement audiosElement = gson.toJsonTree(audios, listType);
+            jsonObject.add("audios", audiosElement);
+
+            ejercicio.setContenido(gson.toJson(jsonObject));
+            repository.save(ejercicio);
+        }
     }
 }
