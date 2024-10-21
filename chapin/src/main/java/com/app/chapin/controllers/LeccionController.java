@@ -2,6 +2,7 @@ package com.app.chapin.controllers;
 
 import com.app.chapin.persistence.dtos.request.CatalogoDto;
 import com.app.chapin.persistence.dtos.request.LeccionDto;
+import com.app.chapin.persistence.dtos.response.UsuarioLeccionesDto;
 import com.app.chapin.persistence.models.Catalogo;
 import com.app.chapin.persistence.models.Lecciones;
 import com.app.chapin.services.LeccionService;
@@ -31,6 +32,11 @@ public class LeccionController {
     @GetMapping("/all")
     public List<LeccionDto> getLecciones() {
         return service.getLeccionesDtos();
+    }
+
+    @GetMapping("/all/{username}")
+    public List<UsuarioLeccionesDto> getLeccionesByUsername(@PathVariable @Parameter(description  = "username") String username) {
+        return service.getLeccionesByUsername(username);
     }
 
     @PutMapping("/{id}")

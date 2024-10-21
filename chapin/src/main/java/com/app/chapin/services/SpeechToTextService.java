@@ -35,10 +35,32 @@ public class SpeechToTextService {
 
 
     public String encodeFileToBase64(MultipartFile file) throws IOException {
+        // Tamaño original del archivo en bytes
+        long originalSize = file.getSize();
+        System.out.println("Tamaño original del archivo (bytes): " + originalSize);
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byteArrayOutputStream.write(file.getBytes());
         byte[] bytes = byteArrayOutputStream.toByteArray();
         return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    public String encodeFileToBase642(MultipartFile file) throws IOException {
+        // Tamaño original del archivo en bytes
+        long originalSize = file.getSize();
+        System.out.println("Tamaño original del archivo (bytes): " + originalSize);
+
+        // Leer el archivo en bytes
+        byte[] bytes = file.getBytes();
+
+        // Codificar en Base64
+        String base64Encoded = Base64.getEncoder().encodeToString(bytes);
+
+        // Tamaño de la cadena Base64
+        int base64Length = base64Encoded.length();
+        System.out.println("Tamaño de la cadena Base64 (caracteres): " + base64Length);
+
+        return base64Encoded;
     }
 
     public String transcribeAudio(String base64Audio) throws IOException {
@@ -49,7 +71,7 @@ public class SpeechToTextService {
             {
                 "config": {
                     "encoding": "MP3",
-                    "sampleRateHertz": 16000,
+                    "sampleRateHertz": 8000,
                     "model": "default",
                     "languageCode": "es-GT"
                 },

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,8 +33,10 @@ public class AuthController {
         try {
             log.info("Entro bien");
             return ResponseEntity.ok().body(service.login(loginRequest));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new GenericResponse(500, "Credenciales invalidas"));
         } catch (AuthenticationException e) {
-            return ResponseEntity.internalServerError().body(new GenericResponse(500, "Credenciales invalidas"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new GenericResponse(500, "Credenciales invalidas"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

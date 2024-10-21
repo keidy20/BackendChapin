@@ -3,8 +3,10 @@ package com.app.chapin.services;
 import com.app.chapin.exceptions.NotFoundException;
 import com.app.chapin.persistence.dtos.AudioDto;
 import com.app.chapin.persistence.dtos.ByteArrayMultipartFile;
+import com.app.chapin.persistence.dtos.UsuarioEjercicioCompleted;
 import com.app.chapin.persistence.dtos.request.EjercicioDto;
 import com.app.chapin.persistence.dtos.request.ContenidoEjercicioDto;
+import com.app.chapin.persistence.dtos.response.MenuEjercicioDto;
 import com.app.chapin.persistence.models.Ejercicios;
 import com.app.chapin.persistence.respository.EjercicioRepository;
 import com.app.chapin.utils.Constantes;
@@ -38,6 +40,9 @@ public class EjercicioService {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private UsuariosEjerciciosService usuariosEjerciciosService;
 
     public EjercicioDto crearEjercicio(EjercicioDto dto) {
         Ejercicios ejercicio = new Ejercicios();
@@ -158,5 +163,87 @@ public class EjercicioService {
             ejercicio.setContenido(gson.toJson(jsonObject));
             repository.save(ejercicio);
         }
+    }
+
+    public List<MenuEjercicioDto> getMenuEjerciciosByUsuario(String usuario) {
+
+        List<MenuEjercicioDto> menu = new ArrayList<>();
+        List<Ejercicios> ejercicios = repository.findAll();
+
+        List<UsuarioEjercicioCompleted> usuarioEjercicioCompleteds = usuariosEjerciciosService.getUsuarioEjerciciosCompleted(usuario);
+
+        //Completar Oracion
+        MenuEjercicioDto menuEjercicioCO = new MenuEjercicioDto();
+        menuEjercicioCO.setNombre("Completa la oración");
+        menuEjercicioCO.setTitulo("Ejercicios 10");
+        menuEjercicioCO.setRoute("/completarOracion");
+
+        Integer cantEjerciciosCO = ejercicios.stream()
+                .filter(ejercicio -> ejercicio.getTipoEjercicio().equals("CO"))
+                .collect(Collectors.toList())
+                .size();
+
+        Integer cantEjerciciosCOCompleted = usuarioEjercicioCompleteds.stream()
+                .filter(usuarioEjercicio -> usuarioEjercicio.getTipoEjercicio().equals("CO"))
+                .collect(Collectors.toList())
+                .size();
+
+        if (cantEjerciciosCOCompleted < cantEjerciciosCO) {
+            menuEjercicioCO.setCompletado(false);
+        } else {
+            menuEjercicioCO.setCompletado(true);
+        }
+
+        menu.add(menuEjercicioCO);
+
+        //Completar Frase
+        MenuEjercicioDto menuEjercicioCP = new MenuEjercicioDto();
+        menuEjercicioCP.setNombre("Completa la palabra");
+        menuEjercicioCP.setTitulo("Ejercicios 10");
+        menuEjercicioCP.setRoute("/completarFrase");
+
+        Integer cantEjerciciosCP = ejercicios.stream()
+                .filter(ejercicio -> ejercicio.getTipoEjercicio().equals("CP"))
+                .collect(Collectors.toList())
+                .size();
+
+        Integer cantEjerciciosCPCompleted = usuarioEjercicioCompleteds.stream()
+                .filter(usuarioEjercicio -> usuarioEjercicio.getTipoEjercicio().equals("CP"))
+                .collect(Collectors.toList())
+                .size();
+
+        if (cantEjerciciosCPCompleted < cantEjerciciosCP) {
+            menuEjercicioCP.setCompletado(false);
+        } else {
+            menuEjercicioCP.setCompletado(true);
+        }
+
+        menu.add(menuEjercicioCP);
+
+        //Completar Frase
+        MenuEjercicioDto menuEjercicioCuestionario = new MenuEjercicioDto();
+        menuEjercicioCuestionario.setNombre("Cuestionario");
+        menuEjercicioCuestionario.setTitulo("");
+        menuEjercicioCuestionario.setRoute("/completarQuiz");
+
+        Integer cantEjerciciosCuestionario = ejercicios.stream()
+                .filter(ejercicio -> ejercicio.getTipoEjercicio().equals("QZ"))
+                .collect(Collectors.toList())
+                .size();
+
+        Integer cantEjerciciosCuestionarioCompleted = usuarioEjercicioCompleteds.stream()
+                .filter(usuarioEjercicio -> usuarioEjercicio.getTipoEjercicio().equals("QZ"))
+                .collect(Collectors.toList())
+                .size();
+
+        if (cantEjerciciosCuestionarioCompleted < cantEjerciciosCuestionario) {
+            menuEjercicioCuestionario.setCompletado(false);
+        } else {
+            menuEjercicioCuestionario.setCompletado(true);
+        }
+
+        menu.add(menuEjercicioCuestionario);
+
+        return menu;
     }
 }
