@@ -8,6 +8,7 @@ import com.app.chapin.persistence.respository.UsuariosRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +36,9 @@ public class AuthService {
             return AuthResponse.builder()
                     .token(token)
                     .build();
+        }  catch (BadCredentialsException exception) {
+            log.error("Credenciales invalidas {}", exception);
+            throw exception;
         } catch (AuthenticationException exception) {
             log.error("Credenciales invalidas {}", exception);
             throw exception;

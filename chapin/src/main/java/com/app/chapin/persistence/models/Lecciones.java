@@ -22,4 +22,5 @@ public class Lecciones {
     private boolean activo;
     private LocalDateTime fechaAdicion;
     private LocalDateTime fechaModifico;
+    private Integer quiz;
 }

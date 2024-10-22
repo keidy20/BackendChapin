@@ -18,7 +18,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Value("$(Chapin)")
+    @Value("$(Educate)")
     private String fromEmail;
 
     public void sendEmail() {

@@ -12,4 +12,5 @@ public class LeccionDto {
     private Integer orden;
     private Integer duracionEstimada;
     private boolean activo;
+    private Integer quiz;
 }

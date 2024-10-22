@@ -47,4 +47,11 @@ public class EjercicioController {
         service.agregarAudio(id, forzar);
         return ResponseEntity.ok("Se agregaron los archivos de audio");
     }
+
+    @GetMapping("/menu-ejercicios/{usuario}")
+    public ResponseEntity<?> getMenuEjercicios(
+            @PathVariable @Parameter(description = "usuario") String usuario
+    ) {
+        return ResponseEntity.ok(service.getMenuEjerciciosByUsuario(usuario));
+    }
 }
